@@ -1,0 +1,10 @@
+model:
+  type: "multinomial"
+  name: "mutlinomial_l2_lbfgs"
+  solver: "lbfgs"
+  penalty: "l2"
+
+preprocess:
+  name: "simple_dummy"
+  type: "simple"
+  train_size: 0.8

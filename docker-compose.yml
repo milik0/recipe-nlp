@@ -10,28 +10,40 @@ services:
       - API_URL=http://models:5000
       - MLFLOW_TRACKING_URI=http://mlflow:5000
     depends_on:
-      - models
+      #- recommender
+      #- generator
+      - complexity
 
-  recommender:
+  complexity:
     build:
-      context: ./models/recommender
+      context: ./models/complexity
     ports:
-      - "5001:5000"
+      - "5003:5000"
     environment:
       - API_PORT=5000
     depends_on:
       - mlflow
 
-  generator:
-    build:
-      context: ./models/generator
-    ports:
-      - "5002:5000"
-    environment:
-      - MODEL_NAME=regression_model  # Example model name
-      - API_PORT=5000
-    depends_on:
-      - mlflow
+ # recommender:
+ #   build:
+ #     context: ./models/recommender
+ #   ports:
+ #     - "5001:5000"
+ #   environment:
+ #     - API_PORT=5000
+ #   depends_on:
+ #     - mlflow
+
+  #generator:
+  #  build:
+  #    context: ./models/generator
+  #  ports:
+  #    - "5002:5000"
+  #  environment:
+  #    - MODEL_NAME=regression_model  # Example model name
+  #    - API_PORT=5000
+  #  depends_on:
+  #    - mlflow
 
   mlflow:
     image: continuumio/miniconda3:latest
