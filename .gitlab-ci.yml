@@ -1,0 +1,8 @@
+include:
+  - 'ci/dashboard.gitlab-ci.yml'
+  - 'ci/etl.gitlab-ci.yml'
+
+stages:
+  - lint
+  - test
+  - build

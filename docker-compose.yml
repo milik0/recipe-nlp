@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://models:5000
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - models
+
+  recommender:
+    build:
+      context: ./models/recommender
+    ports:
+      - "5001:5000"
+    environment:
+      - API_PORT=5000
+    depends_on:
+      - mlflow
+
+  generator:
+    build:
+      context: ./models/generator
+    ports:
+      - "5002:5000"
+    environment:
+      - MODEL_NAME=regression_model  # Example model name
+      - API_PORT=5000
+    depends_on:
+      - mlflow
+
+  mlflow:
+    image: continuumio/miniconda3:latest
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./data/mlflow:/mlflow 
+    command: >
+      bash -c "
+        conda install -c conda-forge mlflow && 
+        mlflow server --host 0.0.0.0 --backend-store-uri /mlflow --default-artifact-root /mlflow
+      "
+
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=ml_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
