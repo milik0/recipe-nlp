@@ -1,9 +1,7 @@
 pandas
 numpy
-torch
 fastapi
 hydra-core
 pydantic
 scikit-learn
 joblib
-rich

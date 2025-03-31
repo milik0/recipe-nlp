@@ -1,27 +1,25 @@
 import joblib
 import os
-from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 from pydantic import BaseModel, Field
-from typing import Literal, Self, Any
+from typing import Self, Any
 from models.model import AbstractModel
 
 class MultinomialParams(BaseModel):
     """Configuration for the multinomial logistic regression model."""
-    type: str = "multinomial"
-    name: str
-    solver: Literal["lbfgs", "saga", "newton-cg"] = "lbfgs"
-    penalty: Literal["l2", "none"] = "l2"
-    C: float = Field(default=1.0, gt=0, description="Inverse regularization strength")
+    type: str = "multinomial_nb"
+    name: str = "Complexity"
+    alpha: float =  Field(default=1.0, gt=0)
 
 class Multinomial(AbstractModel):
     def __init__(self, config: MultinomialParams):
         super().__init__(config)
-        self.logger.info(f"Initializing {self.config.name} model with configuration: {self.config.model_dump()}")
-        self.model = LogisticRegression(**self.config.model_dump(exclude={"name"}))
+        #self.logger.info(f"Initializing {self.config.name} model with configuration: {self.config.model_dump()}")
+        self.model = MultinomialNB(alpha=self.config.alpha)
 
     def fit(self: Self, X: np.ndarray, y: np.ndarray) -> Self:
-        self.logger.info(f"Starting training with config: {self.config.model_dump()}")
+        #self.logger.info(f"Starting training with config: {self.config.model_dump()}")
         self.model.fit(X, y)
         self.logger.info("Training completed successfully")
         return self

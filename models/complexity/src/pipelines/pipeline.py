@@ -21,11 +21,6 @@ class AbstractPipeline(ABC):
         pass
 
     @abstractmethod
-    def transformX(self : Self, X: Any) -> Any:
-        """Apply transformations to X."""
-        pass
-
-    @abstractmethod
     def split(self : Self, X: Any, y: Any) -> tuple:
         """Split data into training and test sets."""
         pass

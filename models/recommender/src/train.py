@@ -21,7 +21,7 @@ def train(cfg: DictConfig):
             model = bert.BERTModel(cfg.model)
         else:
             model = lstm.LSTMModel(cfg.model)
-        
+
         # Train model
         model.train(train_data, val_data)
 

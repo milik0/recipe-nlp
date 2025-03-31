@@ -1,11 +1,7 @@
 from fastapi import FastAPI
-from app.config import settings
-from app.routes import recipe
+from config import settings
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
-
-# Include Routes
-app.include_router(recipe.router)
 
 @app.get("/")
 def root():

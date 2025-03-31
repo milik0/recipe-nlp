@@ -46,3 +46,6 @@ nohup.out
 # Volumes
 data
 .venv
+
+# hydra
+outputs
