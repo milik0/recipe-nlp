@@ -1,9 +1,0 @@
-pandas
-numpy
-fastapi
-hydra-core
-pydantic
-scikit-learn
-joblib
-mlflow
-boto3
