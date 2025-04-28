@@ -7,4 +7,3 @@
 Pas de redondance
 Clarté
 Limites, difficulté, pistes
-

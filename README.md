@@ -6,7 +6,7 @@ Mateo Lelong
 =======
 ## Datasets
 
-NLGRecipe: 
+NLGRecipe:
 
 https://www.kaggle.com/datasets/paultimothymooney/recipenlg/data
 

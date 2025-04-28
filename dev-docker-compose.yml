@@ -49,7 +49,7 @@ services:
       - MINIO_ROOT_PASSWORD=rootroot
       - AWS_SECRET_ACCESS_KEY=rootroot
     volumes:
-      - ./data/mlflow:/mlflow 
+      - ./data/mlflow:/mlflow
     command: >
       /bin/sh -c "pip install psycopg2-binary boto3 && \
       mlflow server --backend-store-uri postgresql://admin:secret@postgres:5432/ml_database \
