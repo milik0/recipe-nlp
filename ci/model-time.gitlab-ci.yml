@@ -12,6 +12,14 @@ model_time:lint:docker:
   before_script: cd models/model_time
   script: hadolint Dockerfile --ignore DL3008 --ignore DL3015 --ignore DL3059
 
+model_time:lint:mypy:
+  image: python:3.11-slim
+  stage: lint
+  before_script: cd models/model_time
+  script:
+    - pip install mypy
+    - mypy src/
+
 model_time:test:
   image: python:3.11-slim
   stage: test

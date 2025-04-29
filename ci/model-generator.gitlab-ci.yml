@@ -1,7 +1,7 @@
 model_generator:lint:python:
   image: python:3.11-slim
   stage: lint
-  before_script: cd model_generator
+  before_script: cd models/model_generator
   script:
     - pip install black==23.3.0
     - black --check src/
@@ -12,10 +12,18 @@ model_generator:lint:docker:
   before_script: cd models/model_generator
   script: hadolint Dockerfile --ignore DL3008 --ignore DL3015 --ignore DL3059
 
+model_generator:lint:mypy:
+  image: python:3.11-slim
+  stage: lint
+  before_script: cd models/model_generator
+  script:
+    - pip install mypy
+    - mypy src/
+
 model_generator:test:
   image: python:3.11-slim
   stage: test
-  before_script: cd model_generator
+  before_script: cd models/model_generator
   script:
     - python3 tests/run_tests.py
 

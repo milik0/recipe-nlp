@@ -77,3 +77,14 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+
+  time:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODEL_NAME: time
+    image: time
+    container_name: complexitys
+    depends_on:
+      - mlflow

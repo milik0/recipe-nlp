@@ -1,10 +1,18 @@
-model_recommender:lint:python:
+model_recommender:lint:black:
   image: python:3.11-slim
   stage: lint
-  before_script: cd model_recommender
+  before_script: cd models/model_recommender
   script:
     - pip install black==23.3.0
     - black --check src/
+
+model_recommender:lint:mypy:
+  image: python:3.11-slim
+  stage: lint
+  before_script: cd models/model_recommender
+  script:
+    - pip install mypy
+    - mypy src/
 
 model_recommender:lint:docker:
   image: hadolint/hadolint:v2.12.0-alpine

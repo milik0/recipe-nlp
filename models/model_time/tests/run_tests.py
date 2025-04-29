@@ -1,15 +1,15 @@
 from omegaconf import DictConfig
-from src.models.multinomial import Multinomial
-from src.pipelines.simple import SimplePipeline
+from model_time.src.baseline_model import BaseLineModel
+from model_time.src.baseline_pipeline import BaselinePipeline
 import hydra
 from hydra.utils import to_absolute_path
 from sklearn.metrics import mean_squared_error
 
 models = {
-    "multinomial": Multinomial,
+    "baseline": BaseLineModel,
 }
 pipelines = {
-    "simple": SimplePipeline,
+    "baseline": BaselinePipeline,
 }
 
 metrics = {
@@ -17,7 +17,7 @@ metrics = {
 }
 
 
-@hydra.main(config_path="../configs", config_name="mutlinomial_l2_lbfgs")
+@hydra.main(config_path="../configs", config_name="test")
 def run_tests(cfg: DictConfig):
     model = models[cfg.model.type](cfg.model)
     model_path = to_absolute_path(f"models/{cfg.model.name}/{cfg.model.version}")

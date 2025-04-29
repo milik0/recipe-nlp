@@ -1,5 +1,0 @@
-sklearn
-pandas
-numpy
-torch
-fastapi

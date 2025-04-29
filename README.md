@@ -4,6 +4,17 @@ Maxime Boucquillon
 Khaled Mili
 Mateo Lelong
 =======
+
+## Run
+
+```bash
+docker-compose up
+```
+
+```bash
+docker-compose -f dev-docker-compose.yml run --build time bash
+```
+
 ## Datasets
 
 NLGRecipe:

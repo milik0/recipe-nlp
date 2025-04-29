@@ -5,3 +5,7 @@ hydra-core
 pydantic
 scikit-learn
 joblib
+nltk
+mlflow
+rich
+boto3

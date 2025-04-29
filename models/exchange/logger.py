@@ -5,7 +5,6 @@ from rich.logging import RichHandler  # Colorful logs (install with `pip install
 
 os.makedirs("logs", exist_ok=True)
 
-
 def get_logger(name: str = "recipe_api", log_level=logging.INFO) -> logging.Logger:
     """Create and configure a logger with a dynamically named log file."""
 

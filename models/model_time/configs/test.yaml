@@ -1,7 +1,6 @@
 model:
-  type: "multinomial_nb"
-  name: "Complexity"
-  alpha: 1.0
+  type: "linear"
+  name: "Time"
 
 pipeline:
   name: "simple_dummy"
@@ -10,7 +9,5 @@ pipeline:
   file_path: "/home/samy/epita/ing2/nlp/nlp1/models/complexity/data/recipe_dataset.csv"
 
 metrics:
-  - accuracy
-  - precision
-  - recall
-  - f1
+  - mse
+  - r2

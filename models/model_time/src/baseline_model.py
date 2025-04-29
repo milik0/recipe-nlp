@@ -1,24 +1,23 @@
 import joblib
 import os
-from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 from pydantic import BaseModel, Field
 from typing import Self, Any
-from src.models.base import AbstractModel
+from sklearn.linear_model import LinearRegression
+
+from exchange.abstract_model import AbstractModel
+
+class BaselineParams(BaseModel):
+    """Configuration for the baseline model."""
+
+    type: str = "baseline"
+    name: str = "Time"
 
 
-class MultinomialParams(BaseModel):
-    """Configuration for the multinomial logistic regression model."""
-
-    type: str = "multinomial_nb"
-    name: str = "Complexity"
-    alpha: float = Field(default=1.0, gt=0)
-
-
-class Multinomial(AbstractModel):
-    def __init__(self, config: MultinomialParams):
+class BaseLineModel(AbstractModel):
+    def __init__(self, config: BaselineParams):
         super().__init__(config)
-        self.model = MultinomialNB(alpha=self.config.alpha)
+        self.model = LinearRegression()
 
     def fit(self: Self, X: np.ndarray, y: np.ndarray) -> Self:
         self.model.fit(X, y)
@@ -28,7 +27,6 @@ class Multinomial(AbstractModel):
     def predict(self: Self, X: np.ndarray) -> np.ndarray:
         self.logger.info(f"Making predictions with model: {self.config.name}")
         predictions = self.model.predict(X)
-        self.logger.info(f"Predictions made for {len(X)} samples")
         return predictions
 
     def save(self: Self, path: str) -> None:
