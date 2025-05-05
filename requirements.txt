@@ -10,3 +10,6 @@ seaborn
 nltk
 rapidfuzz
 gensim
+torch
+torcheval
+torchmetrics
