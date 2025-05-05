@@ -13,3 +13,5 @@ gensim
 torch
 torcheval
 torchmetrics
+transformers
+tqdm
