@@ -80,8 +80,9 @@ def train_models(data):
         X_train, X_test, y_train, y_test, X_train_indices, X_test_indices = train_test_split(
             X, y, data.index, test_size=0.2, random_state=42
         )
-
+        print(f"\nRunning tests for {embedding}")
         # Linear Regression
+        print(f"\n{embedding} - Linear Regression Start")
         start = time.time()
         linear_metrics = train_simple_model(LinearRegression(), X_train, y_train, X_test, y_test)
         linear_metrics.update({
@@ -90,7 +91,8 @@ def train_models(data):
             "embedding_type": embedding
         })
         results.append(linear_metrics)
-
+        print(f"{embedding} - Linear Regression Done")
+        print(f"\n{embedding} - Bayesian Ridge Start")
         # Bayesian Ridge
         start = time.time()
         bayesian_metrics = train_simple_model(BayesianRidge(), X_train, y_train, X_test, y_test)
@@ -100,8 +102,9 @@ def train_models(data):
             "embedding_type": embedding
         })
         results.append(bayesian_metrics)
-
+        print(f"{embedding} - Bayesian Ridge Done")
         # Feedforward NN
+        print(f"\n{embedding} - FeedForward NN Start")
         start = time.time()
         feedforward_metrics = train_feedforward(X_train, y_train, X_test, y_test)
         feedforward_metrics.update({
@@ -110,5 +113,5 @@ def train_models(data):
             "embedding_type": embedding
         })
         results.append(feedforward_metrics)
-
+        print(f"{embedding} - FeedForward NN Done")
     return pd.DataFrame(results).set_index("model")

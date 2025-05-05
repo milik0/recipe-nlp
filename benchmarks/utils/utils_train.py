@@ -5,6 +5,7 @@ from gensim.models import Word2Vec
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+import os
 
 nltk.download('punkt_tab')
 nltk.download('stopwords')
@@ -60,7 +61,7 @@ def preprocess_text(text):
     
     return tokens
 
-def build_word2vec_model(tokenized_texts, vector_size=100, window=5, min_count=1, workers=4):
+def build_word2vec_model(tokenized_texts, vector_size=100, window=5, min_count=1, workers=max(1, int(os.cpu_count() * 0.70))):
     """Train a Word2Vec model on the tokenized texts"""
     model = Word2Vec(sentences=tokenized_texts, 
                     vector_size=vector_size, 
@@ -94,12 +95,12 @@ def build_features_word2vec(data):
     tags_tokenized = data["tags_text"].apply(preprocess_text).tolist()
     
     # Build Word2Vec models
-    steps_w2v = build_word2vec_model(steps_tokenized, vector_size=200)
+    steps_w2v = build_word2vec_model(steps_tokenized, vector_size=400)
     ingredients_w2v = build_word2vec_model(ingredients_tokenized, vector_size=150)
     tags_w2v = build_word2vec_model(tags_tokenized, vector_size=100)
     
     # Create document vectors
-    steps_features = np.array([get_document_vector(doc, steps_w2v, 200) for doc in steps_tokenized])
+    steps_features = np.array([get_document_vector(doc, steps_w2v, 400) for doc in steps_tokenized])
     ingredients_features = np.array([get_document_vector(doc, ingredients_w2v, 150) for doc in ingredients_tokenized])
     tags_features = np.array([get_document_vector(doc, tags_w2v, 100) for doc in tags_tokenized])
     
