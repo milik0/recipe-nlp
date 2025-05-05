@@ -7,9 +7,12 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 import ast
 import os
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.sparse import hstack
 
 from exchange.abstract_pipeline import AbstractPipeline
 from exchange.constants import STOPWORDS
+
 
 class BaselinePipelineParams:
     """Configuration for the simple pipeline."""
@@ -54,37 +57,33 @@ class BaselinePipeline(AbstractPipeline):
         
         return cleaned_recipes
 
-    def transform(self: Self, data: pd.DataFrame) -> tuple:
+    def transform(self: Self, data: pd.DataFrame) -> np.ndarray:
         """Apply simple transformations (e.g., encoding labels)."""
-        self.logger.info("Transforming data")
-
         data.set_index('id', inplace=True)
-        columns = ["tags", "steps", "ingredients", "nutrition"]
-
-        for i in columns:
-            data[i] = data[i].apply(ast.literal_eval)
+        for col in ["tags", "steps", "ingredients", "nutrition"]:
+            data[col] = data[col].apply(ast.literal_eval)
 
         data.drop(columns=["contributor_id", "submitted"], inplace=True, errors="ignore")
         data.dropna(subset=["name"], inplace=True)
 
-        data = data.dropna(subset=['name'])
+        data['name'] = self._clean_recipe_names(data['name'])
 
-        self.lemmatizer = WordNetLemmatizer()
+        for col in ["tags", "steps", "ingredients"]:
+            data[col] = data[col].apply(lambda x: [s.lower() for s in x if isinstance(s, str)] if isinstance(x, list) else [])
 
-        data['cleaned_name'] = self._clean_recipe_names(data['name'])
-        data.dropna(subset=['name'], inplace=True)
+        data['n_steps'] = data['steps'].apply(len)
+        data['n_ingredients'] = data['ingredients'].apply(len)
+
+        data.dropna(subset=["tags", "steps", "ingredients"], inplace=True, how="any")
         data.reset_index(inplace=True)
 
-        data["description"] = data["description"].apply(str.lower)
+        self.logger.info("Applying Bag of Words (CountVectorizer)")
+        bow = CountVectorizer(max_features=1000)
+        X_text = bow.fit_transform(data['ingredients'].apply(lambda x: " ".join(x)))
 
-        columns = ["tags", "steps", "ingredients"]
+        X_numeric = data[["n_steps", "n_ingredients", "minutes"]].fillna(0).to_numpy()
 
-        for c in columns:
-            data[c] = data[c].apply(lambda x: [s.lower() for s in x if isinstance(s, str)])
-
-        data.dropna(subset=columns, inplace=True, how="any")
-
-        return data
+        return hstack([X_text, X_numeric])
 
     def split(self: Self, X: np.ndarray, y: np.ndarray) -> tuple:
         """Split data into train/test sets."""

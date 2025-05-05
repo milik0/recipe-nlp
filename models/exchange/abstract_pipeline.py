@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Tuple, Self
 from pydantic import BaseModel
 from exchange.logger import get_logger
+import pandas as pd
+import numpy as np
 
 class AbstractPipeline(ABC):
     """Abstract base class for a data processing pipeline."""
@@ -16,13 +18,8 @@ class AbstractPipeline(ABC):
         pass
 
     @abstractmethod
-    def transform(self: Self, data: Any) -> Tuple[Any, Any]:
-        """Transform raw data into features (X) and target (y)."""
-        pass
-
-    @abstractmethod
-    def split(self: Self, X: Any, y: Any) -> Tuple[Any, Any, Any, Any]:
-        """Split features and target into training and test sets."""
+    def transform(self: Self, data: pd.DataFrame) -> np.ndarray:
+        """Transform raw data into features>"""
         pass
 
     @abstractmethod

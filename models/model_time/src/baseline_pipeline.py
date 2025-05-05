@@ -4,7 +4,6 @@ from typing import Self, List, Tuple, Any
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import re
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -51,7 +50,7 @@ class BaselinePipeline(AbstractPipeline):
             cleaned_recipes.append(" ".join(words))
         return cleaned_recipes
 
-    def transform(self: Self, data: pd.DataFrame) -> tuple:
+    def transform(self: Self, data: pd.DataFrame) -> np.ndarray:
         """Transform data by cleaning and feature engineering."""
         self.logger.info("Transforming data")
 
@@ -61,6 +60,8 @@ class BaselinePipeline(AbstractPipeline):
 
         data.drop(columns=["contributor_id", "submitted"], inplace=True, errors="ignore")
         data.dropna(subset=["name"], inplace=True)
+        data['n_steps'] = data['steps'].apply(len)
+        data['n_ingredients'] = data['ingredients'].apply(len)
 
         data['cleaned_name'] = self._clean_recipe_names(data['name'])
         data["description"] = data["description"].apply(lambda x: x.lower() if isinstance(x, str) else "")
@@ -71,7 +72,6 @@ class BaselinePipeline(AbstractPipeline):
         data.dropna(subset=["tags", "steps", "ingredients"], inplace=True, how="any")
         data.reset_index(inplace=True)
 
-        # Combine text fields into one
         data['combined_text'] = (
             data['cleaned_name'] + ' ' +
             data['description'].fillna('') + ' ' +
@@ -79,19 +79,13 @@ class BaselinePipeline(AbstractPipeline):
             data['steps'].apply(lambda x: " ".join(x))
         )
 
-        # TF-IDF vectorizer
         self.logger.info("Applying TF-IDF")
         tfidf = TfidfVectorizer(max_features=1000)
         X_text = tfidf.fit_transform(data['combined_text'])
 
-        # Basic numerical features
-        X_numeric = data[["n_steps", "n_ingredients"]].fillna(0)
+        X_numeric = data[["n_steps", "n_ingredients", "minutes"]].fillna(0).to_numpy()
 
-        X_final = hstack([X_text, X_numeric])
-
-        y = data["minutes"]
-
-        return X_final, y
+        return hstack([X_text, X_numeric])
     
     def fit(self: Self, X: np.ndarray, y:np.ndarray) -> Any:
         pass

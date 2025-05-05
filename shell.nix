@@ -1,23 +1,37 @@
-# shell.nix
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-23.11.tar.gz") {} }:
 
 pkgs.mkShell {
   buildInputs = [
-    pkgs.python312
-    pkgs.python312Packages.pip
-    pkgs.python312Packages.setuptools
-    pkgs.python312Packages.pre-commit-hooks
-    pkgs.pre-commit
+    (pkgs.python3.withPackages (ps: with ps; [
+      pandas
+      numpy
+      fastapi
+      hydra-core
+      pydantic
+      scikit-learn
+      joblib
+      nltk
+      mlflow
+      rich
+      boto3
+      jupyter
+      seaborn
+      matplotlib
+      spacy
+      torch
+      torchmetrics
+      rapidfuzz
+      pip
+      setuptools
+      rapidfuzz
+      gensim
+      transformers
+      tqdm
+      optuna
+    ]))
   ];
 
   shellHook = ''
-    if [ ! -d ".venv" ]; then
-      python3 -m venv .venv
-      . .venv/bin/activate
-    fi
-    # Activate pre-commit environment if inside virtualenv
-    if [ -f ".venv/bin/activate" ]; then
-      source .venv/bin/activate
-    fi
+    jupyter notebook
   '';
 }
