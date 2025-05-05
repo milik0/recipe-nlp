@@ -114,9 +114,10 @@ This benchmark compares multiple regression models for predicting recipe prepara
 ### Models Evaluated
 
 1. **Linear Regression**
-   - Implementation: [e.g., scikit-learn]
-   - Hyperparameters: [if applicable]
-   - Feature selection method: [if used]
+   - A fundamental statistical method used to model the relationship between one or more input features and a continuous target variable.
+   - It assumes a linear relationship between the input variables and the output.
+   - The model tries to find the best-fitting line (or hyperplane) by minimizing the sum of squared errors between the predicted and actual values.
+   - It’s easy to implement, interpret, and serves as a baseline model in many machine learning tasks.
 
 2. **Bayesian Ridge**
 
@@ -146,6 +147,12 @@ This benchmark compares multiple regression models for predicting recipe prepara
       - **Reset gate**: decides how much of the past information to forget.
    - GRUs help models retain long-term dependencies in sequential data like text.
 
+5. **Transformer**
+   - Deep learning architecture that rely entirely on attention mechanisms, removing the need for recurrence (as used in RNNs and LSTMs).
+   - The key component is self-attention, which allows the model to weigh the importance of different words in a sentence, regardless of their position.
+   - Transformers use positional encoding to retain information about the order of tokens in the input sequence.
+   - They are highly parallelizable and scalable, making them faster to train on large datasets compared to sequential models.
+
 ### Evaluation Metrics
 
 - Mean Absolute Error (MAE)
@@ -172,21 +179,32 @@ This benchmark compares multiple regression models for predicting recipe prepara
 
 ### Feature Importance Analysis
 
-[Visualization or table showing the relative importance of different features across models]
+In progress for feedforward models.
+
 
 ### Residual Analysis
 
 #### Distribution
 
-We have plotted the residuals of the best-performing model (Gated Neural Network) to check for patterns. The residuals appear to be concentrated around zero, indicating that the model is performing well. However, there are some outliers that suggest certain recipes are more difficult to predict.
+We have plotted the residuals of the best-performing model (Gated Neural Network) to check for patterns. The residuals appear to be concentrated around zero, indicating that the model is performing well despite some outliers.
 
 ![image](../img/distribution_error.png)
 
-#### 
+#### Comparaison with True Values
+
+As you can see in the figure below, the model's predictions are generally close to the true values, with some exceptions. The model tends to underatimate the preparation time for recipes with very long preparation times, which is likely due to the limited amount of data available for these cases.
+
+Some recipes with relatively short preparation times (less than 40 min) are overestimated, but most of the recipes in that timezone are well predicted.
+
+![image](../img/predicted_vs_true_gru.png)
 
 ### Learning Curves
 
-[Visualization showing model performance with varying training set sizes]
+You can see that the model is not overfitting, as the training and validation errors are close to each other. However, the validation error seems to oscillate at the end of the training, which could indicate that the model is not learning anymore and may start to overfit. Thus our early stopping criterion has been reached and the training has been stopped.
+
+![image](../img/curve_feedforward.png)
+
+### ASK Maxim to retrain feedforward with (TF-IDF) with variyng and compare the results.
 
 ## Discussion
 
@@ -199,17 +217,25 @@ We have plotted the residuals of the best-performing model (Gated Neural Network
 | Bayesian Ridge             | Handles multicollinearity, provides uncertainty estimates                 | Assumes linearity, may be sensitive to prior selection                   |
 | Feedforward Neural Network | Can model complex non-linear patterns                                     | Risk of overfitting, less interpretable             |
 | Gated Recurrent Unit       | Suitable for sequential data, fewer parameters than LSTM          | Difficult to train, requires significant computational resources         |
+| Transformer                | Handles long-range dependencies, parallelizable                          | Requires large datasets, complex architecture, computationally expensive |
 
 
-### Error Analysis
+From the result we have shown above, the most suitable model for this task is the Feedforward Neural Network, which indeed outperforms the other models in terms of MAE and R2 Score. The Gated Recurrent Unit and Transformer models also performed well, but they were significantly slower to train and required more computational resources/data.
 
-- Common patterns in prediction errors
-- Specific recipe types or time ranges that were challenging to predict
-- Potential reasons for systematic errors
+### Analysis
 
+- The most challengind part about this task is the processing of the text data. The recipes are often written in a non-standardized way, with various units and formats and some contains useless information that may mislead the model.
+- The linear models (Linear Regression and Bayesian Ridge) also performed amazingly well, but they were not able to capture the non-linear relationships in the data as well as the neural networks.
+- The Word2Vec embeddings did not perform as well as the TF-IDF embeddings. As the TF-IDF directly reflects the importance of words in the dataset, while Word2Vec focuses on semantic similarity and context. For regression tasks (time prediction in our case), the presence or absence of certain keywords (captured by TF-IDF) may be more predictive than semantic similarity.
 ### Recommendations
 
-- Best overall model: **Gated Recurrent Unit**
+- Best overall model:
+   - **Feedforward Neural Network**: it is the best trade-off between performance and training time as the GRU model is very slow to train and requires a lot of computational resources but enhance the performance by a very small margin.
 - Best model for fast recipes: [model name]
 - Best model for long recipes: [model name]
-- Computation-performance tradeoffs
+
+## Conclusion
+
+In this benchmark, we evaluated multiple regression models for predicting recipe preparation time. The Feedforward Neural Network emerged as the best-performing model, achieving the lowest MAE and RMSE while maintaining a reasonable training time. The Gated Recurrent Unit model also performed well but was significantly slower to train and did not provide a substantial performance boost.
+
+The results indicate that while linear models can provide a good baseline, more complex models like neural networks are better suited for capturing the intricacies of recipe preparation times.
