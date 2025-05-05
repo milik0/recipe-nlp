@@ -9,6 +9,20 @@ import os
 
 nltk.download('punkt_tab')
 nltk.download('stopwords')
+def get_mae_by_recipe_length(y_true, y_pred, threshold_long=60, threshold_fast=30):
+
+    # Create masks for fast and long recipes
+    fast_recipes_mask = y_true <= threshold_fast
+    long_recipes_mask = y_true > threshold_long
+    
+    # Calculate MAE for each category
+    mae_fast = mean_absolute_error(y_true[fast_recipes_mask], y_pred[fast_recipes_mask]) if any(fast_recipes_mask) else None
+    mae_long = mean_absolute_error(y_true[long_recipes_mask], y_pred[long_recipes_mask]) if any(long_recipes_mask) else None
+    
+    return {
+        "MAE_fast_recipes": mae_fast,
+        "MAE_long_recipes": mae_long
+    }
 
 def get_metrics(y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
@@ -16,12 +30,15 @@ def get_metrics(y_true, y_pred):
     rmse = np.sqrt(mse)
     r2 = r2_score(y_true, y_pred)
     mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100 if np.all(y_true != 0) else None
+    mae_by_recipe_length = get_mae_by_recipe_length(y_true, y_pred)
     return {
-        "MAE": mae,
+        "MAE global": mae,
         "MSE": mse,
         "RMSE": rmse,
         "R²": r2,
-        "MAPE": mape
+        "MAPE": mape,
+        "MAE_fast_recipes": mae_by_recipe_length["MAE_fast_recipes"],
+        "MAE_long_recipes": mae_by_recipe_length["MAE_long_recipes"]
     }
 
 # Functions for tfidf
