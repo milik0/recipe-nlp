@@ -15,21 +15,27 @@ Limites, difficulté, pistes
 
 Brief description of the dataset used for training and evaluation.
 
-- **Source**: [Source name and link]
-- **Size**: [Number of recipes]
-- **Time period**: [When the data was collected]
-- **Geographic coverage**: [Regional focus of recipes if applicable]
+- **Source**: [RecipeNLG](https://recipenlg.cs.put.poznan.pl/)
+- **Size**: 
+   - 231 636 (total)
+   - 221 457 (regression task)
+- **Geographic coverage**: All around the world but mostly USA, Europe and Asia.
 
 ## Features
 
-| Feature                   | Description                         | Type        | Example Values                |
-| ------------------------- | ----------------------------------- | ----------- | ----------------------------- |
-| Ingredients Count         | Number of ingredients in the recipe | Integer     | 5, 12, 20                     |
-| Steps Count               | Number of preparation steps         | Integer     | 3, 8, 15                      |
-| Recipe Type               | Category of the recipe              | Categorical | Main Dish, Dessert, Appetizer |
-| Cooking Method            | Primary cooking technique           | Categorical | Baking, Frying, Boiling       |
-| Difficulty Level          | Complexity rating                   | Ordinal     | Easy, Medium, Hard            |
-| ...additional features... |                                     |             |                               |
+| Feature        | Description                                           | Type            | Example Values                             |
+|----------------|-------------------------------------------------------|------------------|--------------------------------------------|
+| name           | Name of the recipe                                    | String           | "Spaghetti Bolognese", "Chicken Curry"     |
+| minutes        | Preparation and cooking time in minutes               | Integer          | 30, 45, 120                                 |
+| tags           | List of tags describing the recipe                    | List of Strings  | ["dinner", "easy", "vegetarian"]           |
+| nutrition      | Nutritional information per serving                   | List of Floats   | [500.0, 20.0, 30.0, 5.0, 10.0, 60.0]        |
+| steps          | Step-by-step cooking instructions                     | List of Strings  | ["Boil water", "Add pasta", "Stir sauce"]  |
+| n_steps        | Number of steps in the recipe                         | Integer          | 3, 5, 10                                    |
+| description    | Detailed description of the recipe                    | String           | "A classic Italian pasta dish..."          |
+| ingredients    | List of ingredients required for the recipe           | List of Strings  | ["spaghetti", "ground beef", "tomato"]     |
+| n_ingredients  | Number of ingredients in the recipe                   | Integer          | 5, 8, 12                                    |
+
+
 
 # Recipe Time Prediction Models Benchmark
 
@@ -40,8 +46,8 @@ This benchmark compares multiple regression models for predicting recipe prepara
 ## Target Variable
 
 - **Preparation Time**: Total time in minutes to prepare the recipe (includes both active cooking and passive waiting time)
-- **Distribution**: [Brief description of the distribution of preparation times]
-
+- **Distribution**: Brief description of the distribution of preparation times
+![image](../img/distribution_recipe_time.png)
 ## Methodology
 
 ### Data Preprocessing
@@ -54,38 +60,17 @@ This benchmark compares multiple regression models for predicting recipe prepara
 ### Models Evaluated
 
 1. **Linear Regression**
-
    - Implementation: [e.g., scikit-learn]
    - Hyperparameters: [if applicable]
    - Feature selection method: [if used]
 
-2. **Random Forest Regression**
+2. **Bayesian Ridge**
 
-   - Implementation: [e.g., scikit-learn]
-   - Number of trees: [value]
-   - Max depth: [value]
-   - Other hyperparameters: [list]
 
-3. **Gradient Boosting Regression**
+3. **Feedforward Neural Network**
 
-   - Implementation: [e.g., XGBoost]
-   - Number of estimators: [value]
-   - Learning rate: [value]
-   - Other hyperparameters: [list]
 
-4. **Support Vector Regression**
-
-   - Implementation: [e.g., scikit-learn]
-   - Kernel: [e.g., RBF, linear]
-   - C: [value]
-   - Epsilon: [value]
-
-5. **Neural Network**
-   - Implementation: [e.g., TensorFlow/Keras]
-   - Architecture: [layer sizes]
-   - Activation functions: [list]
-   - Epochs: [value]
-   - Batch size: [value]
+4. **Gated Recurrent Unit Neural Network**
 
 ### Evaluation Metrics
 
@@ -104,13 +89,16 @@ This benchmark compares multiple regression models for predicting recipe prepara
 
 ### Performance Comparison
 
-| Model             | MAE (min) | RMSE (min) | R²  | MAPE (%) | Training Time (s) | Inference Time (ms) |
-| ----------------- | --------- | ---------- | --- | -------- | ----------------- | ------------------- |
-| Linear Regression |           |            |     |          |                   |                     |
-| Random Forest     |           |            |     |          |                   |                     |
-| Gradient Boosting |           |            |     |          |                   |                     |
-| SVR               |           |            |     |          |                   |                     |
-| Neural Network    |           |            |     |          |                   |                     |
+| Model              | MAE       | MSE         | RMSE      | R²     | Train Time (s) | Embedding Type |
+|--------------------|----------|------------|----------|----------|----------------|---------------|
+| Linear Regression | 15.1705   | 634.5855   | 25.1910  | 0.7006   | 10.93          | TF-IDF        |
+| Bayesian Ridge    | 15.1901   | 635.0655   | 25.2005  | 0.7004   | 17.44          | TF-IDF        |
+| Feedforward NN   |  9.3618   | 340.7969   | 18.4607  | 0.8392   | 253.49         | TF-IDF        |
+| Linear Regression | 23.6824   | 1374.7565  | 37.0777  | 0.3514   | 4.33           | Word2Vec      |
+| Bayesian Ridge    | 23.6587   | 1374.4485  | 37.0736  | 0.3515   | 11.34          | Word2Vec      |
+| Feedforward NN   | 20.0696   | 1174.3258  | 34.2684  | 0.4459   | 137.41         | Word2Vec      |
+
+
 
 ### Feature Importance Analysis
 
