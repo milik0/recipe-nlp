@@ -177,7 +177,7 @@ def expand_nutrition_column(data):
         
     return data
 
-def process_data(save=False):
+def process_data(save=True):
     data  = pd.read_csv('../data/RAW_recipes.csv')
     data.set_index('id', inplace=True)
     columns = ["tags", "steps", "ingredients", "nutrition"]
@@ -200,7 +200,8 @@ def process_data(save=False):
 
     data["ingredients_text"] = data["ingredients"].apply(lambda x: ' '.join(x))
     data["ingredients_text"] = data["ingredients"].astype(str)
-
+    
+    data["tags"] = data["tags"].apply(lambda tags: [tag for tag in tags if "minute" not in tag.lower()])
     data["tags_text"] = data["tags"].apply(lambda x: ' '.join(x))
     data["tags_text"] = data["tags"].astype(str)
     
