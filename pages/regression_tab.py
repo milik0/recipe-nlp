@@ -4,7 +4,7 @@ import pandas as pd
 from nltk.stem import PorterStemmer
 import os
 from pages.regression.preprocessing import process_data
-
+import numpy as np
 ps = PorterStemmer()
 
 models_dict = {
@@ -57,7 +57,7 @@ def page_regression():
     
     if compute_clicked:
         data_path = 'data/processed/preprocessed_recipe.csv'
-        
+        st.session_state["metrics_displayed"] = False
         # Use with statement for preprocessing status message
         with st.status("Preparing data...") as status:
             if os.path.isfile(data_path):
@@ -107,8 +107,7 @@ def page_regression():
         progress_bar.empty()
         
         # Display results
-        if not df_results.empty:
-            # Store the results and model selection in session state
+        if not df_results.empty and not st.session_state.get("metrics_displayed", False):
             st.session_state['feature_matrices'] = {
                 'tf': feature_matrices_tf,
                 'w2v': feature_matrices_w2v
@@ -122,14 +121,7 @@ def page_regression():
             st.session_state['previous_model_selection'] = selected_model_names.copy()
             st.session_state['models_computed'] = True
             st.session_state['df_results'] = df_results
-            
-            # Display the full metrics dataframe
-            st.subheader("Model Performance Metrics")
-            
-            # Make sure to include all metrics columns
-            display_columns = ["Model", "MAE global", "MSE", "RMSE", "R²", "MAE_fast_recipes", "MAE_long_recipes"]
-            display_df = df_results[[col for col in display_columns if col in df_results.columns]]
-            st.dataframe(display_df.style.format(precision=4))
+
         else:
             st.warning("No model results to display. There might have been an error during processing.")
     
@@ -152,8 +144,15 @@ def page_regression():
         data = st.session_state['raw_data']
         selected_model_names = st.session_state['selected_models']
         
-        # Select a recipe to predict
-        recipe_names = data['name'].tolist()
+
+        def preprocess_duplicate_names(data):
+            numeric_cols = data.select_dtypes(include=[np.number]).columns
+            aggregated_data = data.groupby("name", as_index=False).agg(
+                {**{col: "mean" for col in numeric_cols}, "description": "first"}
+            )
+            return aggregated_data
+    
+        recipe_names = preprocess_duplicate_names(data)["name"].tolist()
         selected_recipe = st.selectbox(
             "Select a recipe to predict cooking time:",
             options=recipe_names,
@@ -223,9 +222,13 @@ def page_regression():
                         
                         if 'ingredients_text' in recipe_data and isinstance(recipe_data['ingredients_text'], str):
                             st.markdown("#### Ingredients")
-                            ingredients = recipe_data['ingredients_text'].split(',')
+                            
+                            # Remove square brackets and single quotes only
+                            cleaned_text = recipe_data['ingredients_text'].replace('[', '').replace(']', '').replace("'", "")
+                            ingredients = [i.strip() for i in cleaned_text.split(',') if i.strip()]
+                            
                             for i in ingredients[:10]:  # Limit to first 10 ingredients
-                                st.markdown(f"- {i.strip()}")
+                                st.markdown(f"- {i}")
                             if len(ingredients) > 10:
                                 st.markdown(f"*...and {len(ingredients) - 10} more*")
                 
