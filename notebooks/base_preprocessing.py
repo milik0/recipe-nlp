@@ -7,6 +7,7 @@ import os
 import re
 from rapidfuzz import process, fuzz
 import ast
+import logging
 
 from constants_preprocessing import PRIORITIZED_TAGS, STOP_WORDS, STANDARD_TIME, STANDARD_WEIGHT, STANDARD_TEMP, TAG2CLASS, UNIT_CATEGORIES, COMMON_UNITS, TYPO_CORRECTIONS, UNITS, UNIT_CONVERSIONS
 
@@ -19,6 +20,7 @@ class BasePreprocessing:
     def __init__(self):
         self.ps = PorterStemmer()
         self.lemmatizer = WordNetLemmatizer()
+        self.logger = logging.getLogger(__name__)
 
     def load(self, filename: str) -> pd.DataFrame:
         data  = pd.read_csv('../../data/RAW_recipes.csv')
@@ -32,13 +34,13 @@ class BasePreprocessing:
         return data
 
     def transform(self, data: pd.DataFrame) -> pd.DataFrame:
-        print("Cleaning recipe names...")
+        self.logger.info("Cleaning recipe names...")
         data['name'] = self._clean_recipe_names(data['name'])
 
         data.dropna(subset=['name', 'description'], inplace=True)
         data.reset_index(inplace=True)
 
-        print("Cleaning description, steps, tags & ingredients")
+        self.logger.info("Cleaning description, steps, tags & ingredients")
         data["description"] = data["description"].apply(lambda x: x.lower())
 
         for c in ["tags", "steps", "ingredients"]:
@@ -46,13 +48,13 @@ class BasePreprocessing:
 
         data["steps_strings"] = data["steps"].apply(lambda x : ' '.join(x))
 
-        print("Standardize units...")
+        self.logger.info("Standardize units...")
         data["steps_string_standardize"] = data["steps_strings"].apply(self._standardize_units)
 
-        print("Apply number unit diff...")
+        self.logger.info("Apply number unit diff...")
         diffs = data.apply(self._number_unit_diff, axis=1, result_type='expand')
 
-        print("Concatenate results...")
+        self.logger.info("Concatenate results...")
         result = pd.concat([data, diffs], axis=1)
 
         data["ingredients_text"] = data["ingredients"].apply(lambda x: ' '.join(x))
@@ -61,11 +63,11 @@ class BasePreprocessing:
         data["tags_text"] = data["tags"].apply(lambda x: ' '.join(x))
         data["tags_text"] = data["tags"].astype(str)
 
-        print("Finding cuisine for each recipe...")
+        self.logger.info("Finding cuisine for each recipe...")
         data['cuisine'] = data['tags'].apply(self._map_tags_to_cuisine)
         data.dropna(subset=['cuisine'], inplace=True)
 
-        print("Expand Nutrition data...")
+        self.logger.info("Expand Nutrition data...")
         data = self._expand_nutrition_column(data)
         data.drop(columns=['nutrition_score'], inplace=True, errors='ignore')
         data.drop(columns=['ingredients', 'steps', 'steps_strings', 'tags'], inplace=True, errors='ignore')

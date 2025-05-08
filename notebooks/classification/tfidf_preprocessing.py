@@ -8,52 +8,52 @@ import re
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from typing import Tuple, List
+import logging
 import os
 
 class TFIDFPreprocessing:
-    def __init__(self):
-        self.steps_vectorizer = TfidfVectorizer(max_features=500, stop_words='english')
-        self.ingredients_vectorizer = TfidfVectorizer(max_features=500, stop_words='english')
+    def __init__(self, step_max_features=200, ingredients_max_features=200):
+        self.logger = logging.getLogger(__name__)
+        self.steps_vectorizer = TfidfVectorizer(max_features=step_max_features, stop_words='english')
+        self.ingredients_vectorizer = TfidfVectorizer(max_features=ingredients_max_features, stop_words='english')
         self.label_encoder = LabelEncoder()
         self.valid_cuisines = {}
 
     def fit(self, data: pd.DataFrame):
-        print("Extracting primary cuisine...")
-        data['primary_cuisine'] = data['cuisines'].apply(lambda cuisines: cuisines[0] if len(cuisines) > 0 else None)
-        self.valid_cuisines = set(data['primary_cuisine'].unique())
+        data.dropna(subset=['cuisine', 'steps_string_standardize', 'ingredients_text'], inplace=True)
 
-        print("Fitting TF-IDF vectorizers...")
-        self.steps_vectorizer.fit(data["steps_strings"])
+        self.logger.info("Extracting primary cuisine...")
+        self.valid_cuisines = set(data['cuisine'].unique())
+
+        self.logger.info("Fitting TF-IDF vectorizers...")
+        self.steps_vectorizer.fit(data["steps_string_standardize"])
         self.ingredients_vectorizer.fit(data["ingredients_text"])
-        
-        print("Fitting label encoder...")
-        self.label_encoder.fit(data['primary_cuisine'])
-        
+
+        self.logger.info("Fitting label encoder...")
+        self.label_encoder.fit(data['cuisine'])
+
         return self
 
     def transform(self, data) -> Tuple[np.ndarray, np.ndarray]:
-        print("Starting transform process...")
-        data = self._common_preprocessing(data)
-        
+        data.dropna(subset=['cuisine', 'steps_string_standardize', 'ingredients_text'], inplace=True)
+
+        self.logger.info("Starting transform process...")        
         if self.valid_cuisines is None:
             raise ValueError("The preprocessor has not been fitted. Call fit() first.")
 
-        print("Removing invalid cuisines: {data['cuisines'].isin(self.valid_cuisines)}")
-        data = data[data['cuisines'].isin(self.valid_cuisines)].copy()
+        self.logger.info(f"Removing invalid cuisines: {data['cuisine'].isin(self.valid_cuisines)}")
+        data = data[data['cuisine'].isin(self.valid_cuisines)].copy()
 
-        # Extract primary cuisine
-        data['primary_cuisine'] = data['cuisines'].apply(lambda cuisines: cuisines[0] if len(cuisines) > 0 else None)
-        
         # Transform text data using fitted vectorizers
-        print("Applying TF-IDF transformations...")
-        steps_features = self.steps_vectorizer.transform(data["steps_strings"]).toarray()
+        self.logger.info("Applying TF-IDF transformations...")
+        steps_features = self.steps_vectorizer.transform(data["steps_string_standardize"]).toarray()
         ingredients_features = self.ingredients_vectorizer.transform(data["ingredients_text"]).toarray()
-        
+
         # Extract numerical features
         numerical_features = data[['n_steps', 'n_ingredients']].values
         
         # Combine all features
-        print("Building feature matrix...")
+        self.logger.info("Building feature matrix...")
         feature_matrices = [
             steps_features,
             ingredients_features,
@@ -61,7 +61,7 @@ class TFIDFPreprocessing:
         ]
 
         X = np.hstack(feature_matrices)
-        y = self.label_encoder.transform(data['primary_cuisine'])
+        y = self.label_encoder.transform(data['cuisine'])
         return X, y
 
     def fit_transform(self, data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
@@ -83,7 +83,7 @@ class TFIDFPreprocessing:
         with open(os.path.join(directory, "valid_cuisines.pkl"), "wb") as f:
             pickle.dump(self.valid_cuisines, f)
 
-        print(f"Preprocessor saved to {directory}")
+        self.logger.info(f"Preprocessor saved to {directory}")
         
     def load_pipeline(self, directory="./preprocessor"):
         with open(os.path.join(directory, "steps_vectorizer.pkl"), "rb") as f:
@@ -98,5 +98,5 @@ class TFIDFPreprocessing:
         with open(os.path.join(directory, "valid_cuisines.pkl"), "rb") as f:
             self.valid_cuisines = pickle.load(f)
 
-        print(f"Preprocessor loaded from {directory}")
+        self.logger.info(f"Preprocessor loaded from {directory}")
         return self
