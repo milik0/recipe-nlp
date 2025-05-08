@@ -19,7 +19,7 @@ BATCH_SIZE = 32  # Reduced batch size
 BUFFER_SIZE = 1000  # Smaller buffer
 EMBEDDING_DIM = 128  # Reduced embedding size
 RNN_UNITS = 256  # Reduced RNN units
-EPOCHS = 5
+EPOCHS = 10
 MAX_SEQUENCE_LENGTH = 50  # Fixed max sequence length
 TEMPERATURE = 1.0
 EOS_TOKEN = "<EOS>"
@@ -192,7 +192,7 @@ def generate_text(model, tokenizer, seed_text, max_length=100, temperature=TEMPE
 def main():
     """Main function to train and test the model"""
     # Load and preprocess data - limited to 10,000 recipes
-    texts = load_data()  # Further reduced to help with memory
+    texts = load_data(max_recipes=5000)  # Further reduced to help with memory
 
     # Create tokenizer
     tokenizer, vocab_size = create_tokenizer(texts)
