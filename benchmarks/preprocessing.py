@@ -201,7 +201,9 @@ def process_data(save=True):
     data["ingredients_text"] = data["ingredients"].apply(lambda x: ' '.join(x))
     data["ingredients_text"] = data["ingredients"].astype(str)
     
-    data["tags"] = data["tags"].apply(lambda tags: [tag for tag in tags if "minute" not in tag.lower()])
+    data["tags"] = data["tags"].apply(
+        lambda tags: [tag for tag in tags if not any(keyword in tag.lower() for keyword in ["minute", "time", "hours", "preparation"])]
+    )
     data["tags_text"] = data["tags"].apply(lambda x: ' '.join(x))
     data["tags_text"] = data["tags"].astype(str)
     
