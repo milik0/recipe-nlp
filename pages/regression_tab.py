@@ -11,11 +11,11 @@ models_dict = {
     "Linear Regression - TF-IDF": "lr_tf",
     "Bayesian Ridge - TF-IDF": "bayesian_tf",
     "Feedforward Neural Network - TF-IDF": "forward_nn_tf",
-    "Gated Recurrent Unit - TF-IDF": "gru_tf",
+    #"Gated Recurrent Unit - TF-IDF": "gru_tf",
     "Linear Regression - Word2Vec": "lr_w2v",
     "Bayesian Ridge - Word2Vec": "bayesian_w2v",
     "Feedforward Neural Network - Word2Vec": "forward_nn_w2v",
-    "Gated Recurrent Unit - Word2Vec": "gru_w2v",
+    #"Gated Recurrent Unit - Word2Vec": "gru_w2v",
 }
 
 

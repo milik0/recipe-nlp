@@ -141,17 +141,17 @@ class BatchFeedForwardNN:
         
         return all_contexts
     
-    def predict(self, ingredients: List[List[str]], max_steps=20) -> List[List[str]]:
+    def predict(self, input_text: List[List[str]], max_length=20, temperature=None) -> List[List[str]]:
         if self.model is None:
             raise ValueError("Model not fitted!")
         
-        all_contexts = self._prepare_test(ingredients)
+        all_contexts = self._prepare_test(input_text)
         
-        num_ingredients = len(ingredients)
+        num_ingredients = len(input_text)
         current_tokens = [['<s>'] for _ in range(num_ingredients)]
         completed = [False] * num_ingredients
 
-        for step in range(max_steps):
+        for step in range(max_length):
             if all(completed):
                 break
             
@@ -160,24 +160,17 @@ class BatchFeedForwardNN:
             for batch_start in range(0, len(active_indices), self.batch_size):
                 batch_indices = active_indices[batch_start:batch_start + self.batch_size]
                 
-                # Prepare input contexts for this batch
                 batch_contexts = []
                 for idx in batch_indices:
                     if step == 0:
-                        # First step: use the prepared context directly
                         context = all_contexts[idx]
                     else:
-                        # For later steps, update context with new predicted tokens
-                        # Get previously predicted tokens (excluding <s>)
                         predicted_tokens = current_tokens[idx][1:]
                         
-                        # If we have at least context_size tokens, use the most recent ones
                         if len(predicted_tokens) >= self.context:
                             token_ids = [self.token_to_id.get(token, self.token_to_id['<UNKNOWN>']) 
                                        for token in predicted_tokens[-self.context:]]
                         else:
-                            # Otherwise, combine original context with predicted tokens
-                            # Calculate how many tokens to take from original context
                             orig_needed = self.context - len(predicted_tokens)
                             orig_context = all_contexts[idx][:orig_needed]
                             
@@ -192,48 +185,36 @@ class BatchFeedForwardNN:
                 
                     batch_contexts.append(self.context)
                 
-                # Convert to numpy array with correct shape for model
                 batch_input = np.array(batch_contexts)
 
                 expected_shape = (len(batch_indices), self.context)
                 if batch_input.shape != expected_shape:
                     if len(batch_input.shape) == 2 and batch_input.shape[1] == self.context:
-                        # Shape is already correct
                         pass
                     else:
-                        # Try to reshape to the expected input shape
                         try:
                             batch_input = batch_input.reshape(expected_shape)
                         except ValueError:
                             raise ValueError(f"Cannot reshape batch input from {batch_input.shape} to {expected_shape}")
                 
-                # Get predictions for this batch
                 predictions = self.model.predict_on_batch(batch_input)
                 
-                # Process each prediction in the batch
                 for i, pred_idx in enumerate(batch_indices):
-                    # Get the prediction for this sequence
-                    # The shape of predictions could be (batch_size, vocab_size)
                     prediction = predictions[i] if len(predictions) > 1 else predictions[0]
                     
                     next_token_id = np.argmax(prediction)
                     next_token = self.id_to_token[next_token_id]
                     
-                    # Add token to sequence
                     current_tokens[pred_idx].append(next_token)
                     
-                    # Check if we've reached the end token
                     if next_token == '</s>':
                         completed[pred_idx] = True
         
-        # Clean up the results
         all_predictions = []
         for tokens in current_tokens:
-            # Remove start token
             if tokens[0] == '<s>':
                 tokens = tokens[1:]
             
-            # Remove end token if present
             if tokens and tokens[-1] == '</s>':
                 tokens = tokens[:-1]
                 
