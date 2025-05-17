@@ -30,6 +30,10 @@ def perplexity(tokens_lists: List[List[str]]) -> float:
     
     return float('inf')
 
+def perplexity(y_true, y_pred):
+    sparse_ce = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred)
+    return tf.exp(tf.reduce_mean(sparse_ce))
+
 def _get_ngrams(segment, max_order):
   ngram_counts = collections.Counter()
   for order in range(1, max_order + 1):

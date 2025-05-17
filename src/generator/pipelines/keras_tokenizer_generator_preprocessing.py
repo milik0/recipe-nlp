@@ -67,11 +67,9 @@ class KerasTokenizerGeneratorPreprocessing:
         return corpus
 
     def tokenize(self, text: str) -> List[str]:
-        # Tokenize the text into individual words
         return text.split()
     
     def tokenize_list(self, text_list: List[str]) -> List[List[str]]:
-        # Flatten the list of steps into a single list of words
         flattened = []
         for text in text_list:
             flattened.extend(self.tokenize(text))

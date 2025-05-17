@@ -200,10 +200,7 @@ class BPEGeneratorPreprocessing:
         return chars
 
     def tokenize_list(self, text_list: List[str]) -> List[List[str]]:
-        print(f"Tokenizing list of {len(text_list)} texts...")
-        result = [self.tokenize(text) for text in text_list]
-        print(f"Tokenization complete.")
-        return result
+        return [self.tokenize(text) for text in text_list]
 
     def fit(self, X: pd.DataFrame, y=None):
         print(f"\n{'='*50}")
@@ -235,7 +232,7 @@ class BPEGeneratorPreprocessing:
 
         print("\nExtracting ingredients and steps...")
         for idx, row in X.iterrows():
-            if idx % 100 == 0 and idx > 0:
+            if idx % 1000 == 0 and idx > 0:
                 print(f"  - Processed {idx} rows")
                 
             ingredients = self._extract_ingredients(row)
