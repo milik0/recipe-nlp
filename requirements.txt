@@ -17,3 +17,5 @@ torchmetrics
 transformers
 tqdm
 joblib
+wordcloud
+plotly

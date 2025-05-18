@@ -7,7 +7,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 import os
 
-from pages.regression.utils.utils_preprocessing import correct_term, parse_range, unit_categories, unit_conversions, standardize_measurements, standardize_temperature
+from frontend.regression.utils.utils_preprocessing import correct_term, parse_range, unit_categories, unit_conversions, standardize_measurements, standardize_temperature
 
 ps = PorterStemmer()
 

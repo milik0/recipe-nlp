@@ -218,6 +218,6 @@ class RecipeNGramModel:
             pickle.dump(self, f)
 
     @classmethod
-    def load(cls, filepath: str) -> "RecipeNGramModel":
+    def load(self, filepath: str):
         with open(filepath, "rb") as f:
             return pickle.load(f)

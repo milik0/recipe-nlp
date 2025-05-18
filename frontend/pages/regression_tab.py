@@ -1,11 +1,10 @@
-from pages.regression.train_models import select_model, create_feature_matrices, train_test_split_custom, predict_cooking_time
 import streamlit as st
 import pandas as pd
-from nltk.stem import PorterStemmer
 import os
-from pages.regression.preprocessing import process_data
 import numpy as np
-ps = PorterStemmer()
+
+from frontend.regression.train_models import select_model, create_feature_matrices, train_test_split_custom, predict_cooking_time
+from frontend.regression.preprocessing import process_data
 
 models_dict = {
     "Linear Regression - TF-IDF": "lr_tf",

@@ -1,7 +1,5 @@
-import time
 import pandas as pd
 from sklearn.linear_model import BayesianRidge, LinearRegression
-from pages.regression.utils.utils_train import build_features_tfidf, build_features_word2vec, get_metrics
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 from tensorflow.keras.optimizers import Adam
@@ -13,6 +11,8 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 import os
 import joblib
+
+from frontend.regression.utils.utils_train import build_features_tfidf, build_features_word2vec, get_metrics
 
 def predict_cooking_time(model_key, recipe_data, feature_matrices, train_test_data):
     X_train, X_test, _, _, X_train_indices, X_test_indices = train_test_data
