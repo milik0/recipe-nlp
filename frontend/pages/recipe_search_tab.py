@@ -311,10 +311,6 @@ def display_recipe_details(recipe):
             cleaned_text = recipe['ingredients_text'].replace('[', '').replace(']', '').replace("'", "")
             ingredients = [i.strip() for i in cleaned_text.split(',') if i.strip()]
 
-            # Show list
-            for i in ingredients:
-                st.markdown(f"- {i}")
-
             copy_text = "\n".join(ingredients)
             st.text_area("📋 Copy Ingredients", copy_text, height=150)
 
